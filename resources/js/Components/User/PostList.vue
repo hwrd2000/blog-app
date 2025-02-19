@@ -24,9 +24,9 @@ const handlePostDeleted = (postId) => {
   posts.value = posts.value.filter(post => post.id !== postId);
 };
 
-const handlePostCreated = (newPost) => {
-  posts.value.unshift(newPost);
-};
+// const handlePostCreated = (newPost) => {
+//   posts.value.unshift(newPost);
+// };
 
 onMounted(() => {
   fetchPosts();

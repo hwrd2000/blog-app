@@ -16,6 +16,7 @@ const newComment = ref("");
 const isEditing = ref(false);
 const editedTitle = ref("");
 const editedContent = ref("");
+const editedImage = ref(null);
 
 const getImageUrl = (imagePath) => {
   return "/storage/" + imagePath;
@@ -85,18 +86,33 @@ const cancelEdit = () => {
   isEditing.value = false;
 };
 
+const handleFileChange = (event) => {
+  editedImage.value = event.target.files[0];
+};
+
 const updatePost = async () => {
-  try {
-    const response = await axios.put(`/post/${props.post.id}`, {
-      title: editedTitle.value,
-      content: editedContent.value,
-    });
-    props.post.title = response.data.data.title;
-    props.post.content = response.data.data.content;
-    isEditing.value = false;
-  } catch (error) {
-    console.error("Error updating post:", error);
-  }
+    try {
+        const formData = new FormData();
+        formData.append("_method", "PUT");
+        formData.append("title", editedTitle.value);
+        formData.append("content", editedContent.value);
+
+        if (editedImage.value) {
+            formData.append("image", editedImage.value);
+        }
+
+        const response = await axios.post(`/post/${props.post.id}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" }
+        });
+
+        props.post.title = response.data.data.title;
+        props.post.content = response.data.data.content;
+        props.post.image = response.data.data.image;
+
+        isEditing.value = false;
+    } catch (error) {
+        console.error("Error updating post:", error);
+    }
 };
 
 const deletePost = async () => {
@@ -141,10 +157,10 @@ const deleteComment = async (comment, parentComment = null) => {
 </script>
 
 <template>
-    <div class="mb-6 bg-white dark:bg-gray-800 shadow rounded p-4">
+    <div class="mb-6 bg-white text-black border border-gray-300 shadow rounded p-4">
         <div class="flex justify-between items-start">
           <div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">
+            <p class="text-sm text-gray-600">
               Posted by: {{ post.user ? post.user.name : "OP" }}
             </p>
           </div>
@@ -166,23 +182,24 @@ const deleteComment = async (comment, parentComment = null) => {
         </div>
     
         <div v-if="!isEditing">
-          <h3 class="font-bold text-xl text-gray-800 dark:text-gray-200">
+          <h3 class="font-bold text-xl text-black">
             {{ post.title }}
           </h3>
-          <p class="mt-2 text-gray-700 dark:text-gray-300">{{ post.content }}</p>
+          <p class="mt-2 text-gray-700">{{ post.content }}</p>
         </div>
         <div v-else class="mt-2">
           <input
             v-model="editedTitle"
             type="text"
-            class="w-full p-2 border rounded"
+            class="w-full p-2 border border-gray-400 rounded bg-white text-black"
             placeholder="Update title"
           />
           <textarea
             v-model="editedContent"
-            class="w-full p-2 border rounded mt-2"
+            class="w-full p-2 border border-gray-400 rounded mt-2 bg-white text-black"
             placeholder="Update content"
           ></textarea>
+          <input type="file" @change="handleFileChange" accept="image/*" class="mt-2 w-full text-sm text-gray-900 border border-gray-400 rounded p-2" />
           <div class="flex space-x-2 mt-2">
             <button
               @click="updatePost"
@@ -203,19 +220,19 @@ const deleteComment = async (comment, parentComment = null) => {
           <img
             :src="getImageUrl(post.image)"
             alt="Post image"
-            class="w-25 h-25 object-cover rounded"
+            class="w-15 h-15 object-cover rounded"
           />
         </div>
     
     <div class="mt-4">
-      <h4 class="font-semibold text-gray-800 dark:text-gray-200">
+      <h4 class="font-semibold text-black">
         <u>Comments</u>
       </h4>
       <ul>
         <li
           v-for="comment in post.comments"
           :key="comment.id"
-          class="mt-2 text-gray-700 dark:text-gray-300"
+          class="mt-2 text-gray-700"
         >
           <div>
             <span class="font-bold">
@@ -230,11 +247,11 @@ const deleteComment = async (comment, parentComment = null) => {
             </button>
           </div>
           
-          <ul v-if="comment.replies && comment.replies.length" class="ml-4 mt-2 border-l pl-2">
+          <ul v-if="comment.replies && comment.replies.length" class="ml-4 mt-2 border-l border-gray-300 pl-2">
             <li
               v-for="reply in comment.replies"
               :key="reply.id"
-              class="mt-1 text-gray-600 dark:text-gray-400"
+              class="mt-1 text-gray-600"
             >
               <span class="font-bold">
                 {{ reply.user ? reply.user.name : "Unknown" }}:
@@ -258,7 +275,7 @@ const deleteComment = async (comment, parentComment = null) => {
             <textarea
               v-model="comment.newReply"
               placeholder="Write a reply..."
-              class="w-full p-2 border rounded resize-none dark:bg-gray-700 dark:text-gray-100"
+              class="w-full p-2 border border-gray-400 rounded resize-none bg-white text-black"
               rows="1"
             ></textarea>
             <div class="flex justify-end mt-1">
@@ -278,7 +295,7 @@ const deleteComment = async (comment, parentComment = null) => {
       <textarea
         v-model="newComment"
         placeholder="Write a comment..."
-        class="w-full p-2 border rounded resize-none dark:bg-gray-700 dark:text-gray-100"
+        class="w-full p-2 border border-gray-400 rounded resize-none bg-white text-black"
         rows="2"
       ></textarea>
       <div class="flex justify-end mt-2">
