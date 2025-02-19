@@ -1,15 +1,16 @@
 <script setup>
 import { ref } from "vue";
 import axios from "axios";
+import { usePage } from "@inertiajs/vue3";
 
 // const emit = defineEmits(['postCreated']);
+
+const user = usePage().props.auth.user;
 
 const isModalOpen = ref(false);
 const title = ref("");
 const content = ref("");
 const selectedImage = ref(null);
-
-const user = { name: "Howard" };
 
 const openModal = () => {
     isModalOpen.value = true;
@@ -60,7 +61,7 @@ const submitPost = async () => {
             <input
                 type="text"
                 @focus="openModal"
-                :placeholder="`What's on your mind, ${user.name}?`"
+                :placeholder="`What's on your mind, ${user?.name || ''}?`"
                 class="w-full p-3 border border-gray-400 rounded bg-white text-black cursor-pointer"
                 readonly
             />

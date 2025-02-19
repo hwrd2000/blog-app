@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from "vue";
 import axios from "axios";
+import { usePage } from "@inertiajs/vue3";
 
 const props = defineProps({
   post: {
@@ -9,6 +10,7 @@ const props = defineProps({
   },
 });
 
+const user = usePage().props.auth.user;
 const emit = defineEmits(['postDeleted']);
 
 const newComment = ref("");
@@ -164,7 +166,8 @@ const deleteComment = async (comment, parentComment = null) => {
               Posted by: {{ post.user ? post.user.name : "OP" }}
             </p>
           </div>
-          <div class="flex space-x-2">
+
+          <div v-if="user && user.id === post.user.id" class="flex space-x-2">
             <button
               v-if="!isEditing"
               @click="enableEdit"
