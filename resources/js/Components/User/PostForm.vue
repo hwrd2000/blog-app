@@ -48,21 +48,21 @@ const submitPost = async () => {
 
 <template>
     <div
-        class="max-w-10xl mx-auto bg-white dark:bg-gray-800 shadow rounded p-4"
+        class="max-w-10xl mx-auto bg-white text-black border border-gray-300 shadow rounded p-4"
     >
         <div>
             <input
                 type="text"
                 v-model="title"
                 placeholder="Title"
-                class="w-full p-2 border rounded dark:bg-gray-700 dark:text-gray-100"
+                class="w-full p-2 border border-gray-400 rounded bg-white text-black"
             />
         </div>
         <div class="mt-2">
             <textarea
                 v-model="content"
                 placeholder="What's on your mind?"
-                class="w-full p-2 border rounded resize-none dark:bg-gray-700 dark:text-gray-100"
+                class="w-full p-2 border border-gray-400 rounded resize-none bg-white text-black"
                 rows="3"
             ></textarea>
         </div>
@@ -71,7 +71,7 @@ const submitPost = async () => {
                 type="file"
                 @change="handleFileChange"
                 accept="image/*"
-                class="block w-full text-sm text-gray-900 dark:text-gray-300"
+                class="block w-full text-sm text-black border border-gray-400 bg-white"
             />
         </div>
         <div class="flex justify-end mt-2">
