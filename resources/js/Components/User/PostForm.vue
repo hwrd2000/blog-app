@@ -4,23 +4,28 @@ import axios from "axios";
 
 // const emit = defineEmits(['postCreated']);
 
+const isModalOpen = ref(false);
 const title = ref("");
 const content = ref("");
 const selectedImage = ref(null);
 
-const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-        selectedImage.value = e.target.files[0];
-    }
+const user = { name: "Howard" };
+
+const openModal = () => {
+    isModalOpen.value = true;
+};
+
+const closeModal = () => {
+    isModalOpen.value = false;
+};
+
+const handleFileChange = (event) => {
+    selectedImage.value = event.target.files[0];
 };
 
 const submitPost = async () => {
-    if (title.value.trim() === "") {
-        alert("Title is required.");
-        return;
-    }
-    if (content.value.trim() === "") {
-        alert("Content is required.");
+    if (!title.value.trim() || !content.value.trim()) {
+        alert("Title and content are required.");
         return;
     }
 
@@ -40,6 +45,7 @@ const submitPost = async () => {
         title.value = "";
         content.value = "";
         selectedImage.value = null;
+        closeModal();
     } catch (error) {
         console.error("Error creating post:", error);
     }
@@ -53,34 +59,72 @@ const submitPost = async () => {
         <div>
             <input
                 type="text"
-                v-model="title"
-                placeholder="Title"
-                class="w-full p-2 border border-gray-400 rounded bg-white text-black"
+                @focus="openModal"
+                :placeholder="`What's on your mind, ${user.name}?`"
+                class="w-full p-3 border border-gray-400 rounded bg-white text-black cursor-pointer"
+                readonly
             />
         </div>
-        <div class="mt-2">
-            <textarea
-                v-model="content"
-                placeholder="What's on your mind?"
-                class="w-full p-2 border border-gray-400 rounded resize-none bg-white text-black"
-                rows="3"
-            ></textarea>
-        </div>
-        <div class="mt-2">
-            <input
-                type="file"
-                @change="handleFileChange"
-                accept="image/*"
-                class="block w-full text-sm text-black border border-gray-400 bg-white"
-            />
-        </div>
-        <div class="flex justify-end mt-2">
-            <button
-                @click="submitPost"
-                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+
+        <Transition name="fade">
+            <div
+                v-if="isModalOpen"
+                class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
             >
-                Post
-            </button>
-        </div>
+                <div
+                    class="bg-white p-6 rounded-lg shadow-lg w-96"
+                    @click.stop
+                >
+                    <h2 class="text-lg font-semibold mb-3">Create a Post</h2>
+                    
+                    <input
+                        type="text"
+                        v-model="title"
+                        placeholder="Title"
+                        class="w-full p-2 border border-gray-400 rounded mb-3"
+                    />
+
+                    <textarea
+                        v-model="content"
+                        placeholder="What's on your mind?"
+                        class="w-full p-2 border border-gray-400 rounded resize-none mb-3"
+                        rows="3"
+                    ></textarea>
+
+                    <input
+                        type="file"
+                        @change="handleFileChange"
+                        accept="image/*"
+                        class="w-full text-sm border border-gray-400 p-2 rounded"
+                    />
+
+                    <div class="flex justify-end gap-2 mt-3">
+                        <button
+                            @click="closeModal"
+                            class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            @click="submitPost"
+                            class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded"
+                        >
+                            Post
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </Transition>
     </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s;
+}
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+</style>
